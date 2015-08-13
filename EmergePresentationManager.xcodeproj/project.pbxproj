@@ -13,6 +13,7 @@
 		CAB84FF71B7C83EE0094613E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CAB84FF61B7C83EE0094613E /* Images.xcassets */; };
 		CAB84FFA1B7C83EF0094613E /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = CAB84FF81B7C83EF0094613E /* LaunchScreen.xib */; };
 		CAB850061B7C83EF0094613E /* EmergePresentationManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB850051B7C83EF0094613E /* EmergePresentationManagerTests.swift */; };
+		CAB850101B7C84020094613E /* EmergePresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB8500F1B7C84020094613E /* EmergePresentationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +37,7 @@
 		CAB84FFF1B7C83EF0094613E /* EmergePresentationManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmergePresentationManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAB850041B7C83EF0094613E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CAB850051B7C83EF0094613E /* EmergePresentationManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergePresentationManagerTests.swift; sourceTree = "<group>"; };
+		CAB8500F1B7C84020094613E /* EmergePresentationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmergePresentationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		CAB84FEC1B7C83EE0094613E /* EmergePresentationManager */ = {
 			isa = PBXGroup;
 			children = (
+				CAB8500F1B7C84020094613E /* EmergePresentationManager.swift */,
 				CAB84FEF1B7C83EE0094613E /* AppDelegate.swift */,
 				CAB84FF11B7C83EE0094613E /* ViewController.swift */,
 				CAB84FF31B7C83EE0094613E /* Main.storyboard */,
@@ -156,6 +159,7 @@
 		CAB84FE21B7C83EE0094613E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Thomas Zhao";
 				TargetAttributes = {
@@ -213,6 +217,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CAB84FF21B7C83EE0094613E /* ViewController.swift in Sources */,
+				CAB850101B7C84020094613E /* EmergePresentationManager.swift in Sources */,
 				CAB84FF01B7C83EE0094613E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -411,6 +416,7 @@
 				CAB8500B1B7C83EF0094613E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		CAB8500C1B7C83EF0094613E /* Build configuration list for PBXNativeTarget "EmergePresentationManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -419,6 +425,7 @@
 				CAB8500E1B7C83EF0094613E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

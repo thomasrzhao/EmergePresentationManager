@@ -8,18 +8,24 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+class ViewController: UIViewController, EmergePresentationManagerDelegate {
+    @IBOutlet weak var presentButton: UIButton!
+    
+    lazy var emergePresentationManager:EmergePresentationManager = EmergePresentationManager();
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if(segue.identifier == "presentationSegue") {
+            emergePresentationManager.delegate = self;
+            
+            let destVC = segue.destinationViewController as! UIViewController;
+            destVC.transitioningDelegate = emergePresentationManager;
+            destVC.modalPresentationStyle = .Custom;
+        }
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    func emergePresentationManager(manager: EmergePresentationManager, viewToEmergeFromForFinalFrame finalFrame: CGRect) -> UIView {
+        return presentButton;
     }
-
-
+    
+    @IBAction func unwind(segue: UIStoryboardSegue) {}
 }
 
