@@ -13,7 +13,7 @@ There are a few steps to start using this class. To begin, add EmergePresentatio
 A EmergePresentationManager instance is designed to be set as the `transitioningDelegate` on the presented view controller. However, since this property is weak, you should maintain a strong reference to the EmergePresentationManager instance, most likely by storing it in a property.
 
 ```swift
-lazy var emergePresentationManager:EmergePresentationManager = EmergePresentationManager();
+lazy var emergePresentationManager = EmergePresentationManager();
 ```
 
 The EmergePresentationManager knows where to emerge from by asking its delegate, which in practice is most likely to be the presenting UIViewController.
@@ -65,9 +65,9 @@ Other behavior, such as the animation duration, can be customized by implementin
 If you have multiple view controllers, each to be presented from different points onscreen, it's easiest to create multiple EmergePresentationManager instances with the same delegate. Then, you can disambiguate between them by using `===` in Swift or `==` in Objective-C on the provided `manager` parameter. For example:
 
 ```swift
-lazy var manager1:EmergePresentationManager = EmergePresentationManager();
-lazy var manager2:EmergePresentationManager = EmergePresentationManager();
-lazy var manager3:EmergePresentationManager = EmergePresentationManager();
+lazy var manager1 = EmergePresentationManager();
+lazy var manager2 = EmergePresentationManager();
+lazy var manager3 = EmergePresentationManager();
 ...
 func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFromForFinalFrame finalFrame:CGRect) -> UIView {
    if(manager === manager1) { return view1; }

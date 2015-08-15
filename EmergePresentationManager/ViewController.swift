@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController, EmergePresentationManagerDelegate {
     @IBOutlet weak var presentButton: UIButton!
     
-    lazy var emergePresentationManager:EmergePresentationManager = EmergePresentationManager();
+    lazy var emergePresentationManager = EmergePresentationManager();
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "presentationSegue") {
             emergePresentationManager.delegate = self;
