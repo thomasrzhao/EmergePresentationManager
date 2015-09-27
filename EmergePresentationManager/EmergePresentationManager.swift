@@ -13,12 +13,12 @@ import UIKit
      * The CGRect returned from the below 2 methods should be converted as follows:
      * theSuperview.convertRect(theView.frame, toView: nil)
      */
-    optional func emergePresentationManager(manager:EmergePresentationManager, frameToEmergeFromForFinalFrame finalFrame:CGRect) -> CGRect;
-    optional func emergePresentationManager(manager:EmergePresentationManager, frameToReturnToForInitialFrame initialFrame:CGRect) -> CGRect;
+    optional func emergePresentationManager(manager:EmergePresentationManager, frameToEmergeFromForFinalSize finalSize:CGSize) -> CGRect;
+    optional func emergePresentationManager(manager:EmergePresentationManager, frameToReturnToForInitialSize initialSize:CGSize) -> CGRect;
     
-    optional func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFromForFinalFrame finalFrame:CGRect) -> UIView;
-    optional func emergePresentationManager(manager:EmergePresentationManager, viewToReturnToForInitialFrame initialFrame:CGRect) -> UIView;
-
+    optional func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFromForFinalSize finalSize:CGSize) -> UIView;
+    optional func emergePresentationManager(manager:EmergePresentationManager, viewToReturnToForInitialSize initialSize:CGSize) -> UIView;
+    
     optional func dimmingViewAlphaForEmergePresentationManager(manager:EmergePresentationManager) -> CGFloat;
     
     optional func durationForEmergeAnimationForEmergePresentationManager(manager: EmergePresentationManager) -> NSTimeInterval;
@@ -26,9 +26,10 @@ import UIKit
     
     optional func initialSpringVelocityForEmergeAnimationForEmergePresentationManager(manager: EmergePresentationManager) -> CGFloat;
     optional func initialSpringVelocityForReturnAnimationForEmergePresentationManager(manager: EmergePresentationManager) -> CGFloat;
-
+    
     optional func springDampingForEmergeAnimationForEmergePresentationManager(manager: EmergePresentationManager) -> CGFloat;
     optional func springDampingForReturnAnimationForEmergePresentationManager(manager: EmergePresentationManager) -> CGFloat;
+    
     
     /*
      * By default, this presentation manager displays the presented view in a form-sheet
@@ -45,19 +46,15 @@ public class EmergePresentationManager: NSObject, UIViewControllerTransitioningD
     
     public static let emergeAnimationDefaultInitialSpringVelocity:CGFloat = 0;
     public static let returnAnimationDefaultInitialSpringVelocity:CGFloat = 0;
-
+    
     public static let emergeAnimationDefaultSpringDamping:CGFloat = 1;
     public static let returnAnimationDefaultSpringDamping:CGFloat = 1;
-
+    
     public static let defaultDimmingViewAlpha:CGFloat = 0.5;
     
     public weak var delegate:EmergePresentationManagerDelegate?;
     
-    public convenience override init() {
-        self.init(delegate: nil);
-    }
-    
-    public required init(delegate:EmergePresentationManagerDelegate?) {
+    public required init(delegate:EmergePresentationManagerDelegate? = nil) {
         self.delegate = delegate;
         super.init();
     }
@@ -69,15 +66,15 @@ public class EmergePresentationManager: NSObject, UIViewControllerTransitioningD
     public func animationControllerForPresentedController(presented: UIViewController,
         presentingController presenting: UIViewController,
         sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return EmergeAnimationPresentationAnimator(manager: self);
+            return EmergeAnimationPresentationAnimator(manager: self);
     }
     
     
     public func presentationControllerForPresentedViewController(presented: UIViewController,
         presentingViewController presenting: UIViewController,
         sourceViewController source: UIViewController) -> UIPresentationController? {
-        let presentationController = EmergeAnimationPresentationController(presentedViewController: presented, presentingViewController: presenting, manager:self);
-        return presentationController;
+            let presentationController = EmergeAnimationPresentationController(presentedViewController: presented, presentingViewController: presenting, manager:self);
+            return presentationController;
     }
 }
 
@@ -100,19 +97,19 @@ private class EmergeAnimationPresentationController: UIPresentationController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil);
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarChangedFrame:", name: UIApplicationDidChangeStatusBarFrameNotification, object: nil);
     }
-
+    
     func fixCornerRadiuses() {
         //Hacky workaround for bug that sometimes results in presentedViewController being nil
         if let presentedViewController = self.presentedViewController as UIViewController? {
             presentedViewController.view.layer.mask = nil;
-
+            
             if(!shouldFullscreen()) {
                 if(traitCollection.horizontalSizeClass == .Regular && traitCollection.verticalSizeClass == .Compact) {
                     let maskLayer = CAShapeLayer();
                     maskLayer.frame = presentedViewController.view.bounds;
                     
                     let maskPath = UIBezierPath(roundedRect: maskLayer.frame,
-                        byRoundingCorners: UIRectCorner.TopLeft | UIRectCorner.TopRight,
+                        byRoundingCorners: [.TopLeft, .TopRight],
                         cornerRadii: CGSize(width: cornerRadius, height: cornerRadius));
                     maskLayer.path = maskPath.CGPath;
                     
@@ -165,7 +162,7 @@ private class EmergeAnimationPresentationController: UIPresentationController {
             containerView?.insertSubview(dimmingView!, atIndex: 0);
         }
         
-        presentedViewController.transitionCoordinator()?.animateAlongsideTransition({ (coordinatorContext) -> Void in
+        presentedViewController.transitionCoordinator()?.animateAlongsideTransition({ coordinatorContext in
             self.dimmingView?.alpha = alpha;
             if(alpha != 0) { self.presentingViewController.view.tintAdjustmentMode = .Dimmed; }
             }, completion: nil)
@@ -179,10 +176,10 @@ private class EmergeAnimationPresentationController: UIPresentationController {
     }
     
     override func dismissalTransitionWillBegin() {
-        presentedViewController.transitionCoordinator()?.animateAlongsideTransition({ (coordinatorContext) -> Void in
+        presentedViewController.transitionCoordinator()?.animateAlongsideTransition({ coordinatorContext in
             self.dimmingView?.alpha = 0.0
             self.presentingViewController.view.tintAdjustmentMode = .Automatic;
-        }, completion: nil)
+            }, completion: nil)
     }
     
     override func dismissalTransitionDidEnd(completed: Bool) {
@@ -191,7 +188,7 @@ private class EmergeAnimationPresentationController: UIPresentationController {
             self.dimmingView?.removeFromSuperview();
         }
     }
-
+    
     override func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews();
         if let containerView = containerView {
@@ -205,12 +202,13 @@ private class EmergeAnimationPresentationController: UIPresentationController {
     override func sizeForChildContentContainer(container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
         return parentSize;
     }
-
+    
     override func frameOfPresentedViewInContainerView() -> CGRect {
+        let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.height;
+        
         if(!shouldFullscreen()) {
-            let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.height;
-            let width:CGFloat = traitCollection.verticalSizeClass == .Compact ? 414 : 540;
             let height:CGFloat = traitCollection.verticalSizeClass == .Compact ? containerView!.bounds.height - statusBarHeight : containerView!.bounds.height;
+            let width:CGFloat = traitCollection.verticalSizeClass == .Compact ? 414 : 540;
             
             var frame = CGRectForRectOfInnerSize(
                 CGSize(width: min(width, containerView!.bounds.width),
@@ -224,7 +222,7 @@ private class EmergeAnimationPresentationController: UIPresentationController {
         }
         
         return containerView!.bounds;
-
+        
     }
     
     override func shouldPresentInFullscreen() -> Bool {
@@ -244,7 +242,7 @@ private class EmergeAnimationPresentationController: UIPresentationController {
     }
     
     func shouldFullscreen() -> Bool {
-        if(traitCollection.horizontalSizeClass == .Regular) {
+        if(traitCollection.horizontalSizeClass != .Compact) {
             return manager.delegate?.shouldAlwaysPresentFullScreenForEmergePresentationManager?(manager) ?? false;
         } else {
             return true;
@@ -253,24 +251,23 @@ private class EmergeAnimationPresentationController: UIPresentationController {
 }
 
 private class EmergeAnimationPresentationAnimator:NSObject, UIViewControllerAnimatedTransitioning {
-
+    
     let manager:EmergePresentationManager;
     init(manager:EmergePresentationManager) {
         self.manager = manager;
         super.init();
     }
     
-    @objc func transitionDuration(transitionContext: UIViewControllerContextTransitioning) -> NSTimeInterval {
+    @objc func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
         return manager.delegate?.durationForEmergeAnimationForEmergePresentationManager?(manager) ??
             EmergePresentationManager.emergeAnimationDefaultDuration;
     }
     
     func getEmergeFromRectForToView(toView:UIView, containerViewSize:CGSize) -> CGRect {
-        let toViewFrame = toView.convertRect(toView.bounds, toView: nil);
-        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToEmergeFromForFinalFrame: toViewFrame) {
+        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToEmergeFromForFinalSize: toView.frame.size) {
             return toView.convertRect(rect, fromView: nil);
         }
-        if let view = manager.delegate?.emergePresentationManager?(manager, viewToEmergeFromForFinalFrame: toViewFrame) {
+        if let view = manager.delegate?.emergePresentationManager?(manager, viewToEmergeFromForFinalSize: toView.frame.size) {
             return toView.convertRect(view.bounds, fromView: view);
         }
         #if DEBUG
@@ -278,39 +275,38 @@ private class EmergeAnimationPresentationAnimator:NSObject, UIViewControllerAnim
         #endif
         return CGRectForRectOfInnerSize(CGSizeMake(1, 1), centeredInOuterSize: containerViewSize);
     }
-
+    
     
     @objc func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
-        let containerView = transitionContext.containerView();
-        
-        if let toView = transitionContext.viewForKey(UITransitionContextToViewKey),
-        presentationController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)?.presentationController {
-            let animationDuration = transitionDuration(transitionContext);
-            
-            toView.alpha = 0;
-            containerView.addSubview(toView);
-            toView.frame = presentationController.frameOfPresentedViewInContainerView();
-
-            let fromRect = getEmergeFromRectForToView(toView, containerViewSize: containerView.frame.size);
-            
-            let scale = CGAffineTransformMakeScale(fromRect.width/toView.bounds.width, fromRect.height/toView.bounds.height);
-            let translate = CGAffineTransformMakeTranslation(CGRectGetMidX(fromRect) - CGRectGetMidX(toView.bounds),
-                CGRectGetMidY(fromRect) - CGRectGetMidY(toView.bounds));
-            
-            toView.transform = CGAffineTransformConcat(scale, translate);
-            
-            UIView.animateWithDuration(animationDuration, delay: 0,
-                usingSpringWithDamping: manager.delegate?.springDampingForEmergeAnimationForEmergePresentationManager?(manager) ??
-                    EmergePresentationManager.emergeAnimationDefaultSpringDamping,
-                initialSpringVelocity: manager.delegate?.initialSpringVelocityForEmergeAnimationForEmergePresentationManager?(manager) ??
-                    EmergePresentationManager.emergeAnimationDefaultInitialSpringVelocity,
-                options: nil, animations: { () -> Void in
-                toView.transform = CGAffineTransformIdentity;
-                toView.alpha = 1;
-                }, completion: { (complete) -> Void in
-                    transitionContext.completeTransition(complete);
-            })
-
+        if let containerView = transitionContext.containerView(),
+            toView = transitionContext.viewForKey(UITransitionContextToViewKey),
+            presentationController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)?.presentationController {
+                let animationDuration = transitionDuration(transitionContext);
+                
+                toView.alpha = 0;
+                containerView.addSubview(toView);
+                toView.frame = presentationController.frameOfPresentedViewInContainerView();
+                
+                let fromRect = getEmergeFromRectForToView(toView, containerViewSize: containerView.frame.size);
+                
+                let scale = CGAffineTransformMakeScale(fromRect.width/toView.bounds.width, fromRect.height/toView.bounds.height);
+                let translate = CGAffineTransformMakeTranslation(CGRectGetMidX(fromRect) - CGRectGetMidX(toView.bounds),
+                    CGRectGetMidY(fromRect) - CGRectGetMidY(toView.bounds));
+                
+                toView.transform = CGAffineTransformConcat(scale, translate);
+                
+                UIView.animateWithDuration(animationDuration, delay: 0,
+                    usingSpringWithDamping: manager.delegate?.springDampingForEmergeAnimationForEmergePresentationManager?(manager) ??
+                        EmergePresentationManager.emergeAnimationDefaultSpringDamping,
+                    initialSpringVelocity: manager.delegate?.initialSpringVelocityForEmergeAnimationForEmergePresentationManager?(manager) ??
+                        EmergePresentationManager.emergeAnimationDefaultInitialSpringVelocity,
+                    options: [], animations: {
+                        toView.transform = CGAffineTransformIdentity;
+                        toView.alpha = 1;
+                    }, completion: { complete in
+                        transitionContext.completeTransition(complete);
+                })
+                
         }
     }
 }
@@ -322,24 +318,23 @@ class EmergeAnimationDismissalAnimator:NSObject, UIViewControllerAnimatedTransit
         self.manager = manager;
         super.init();
     }
-
-    func transitionDuration(transitionContext: UIViewControllerContextTransitioning) -> NSTimeInterval {
+    
+    func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
         return manager.delegate?.durationForReturnAnimationForEmergePresentationManager?(manager) ??
             EmergePresentationManager.returnAnimationDefaultDuration;
     }
     
     func getReturnToRectForFromView(fromView:UIView, containerViewSize:CGSize) -> CGRect {
-        let fromViewFrame = fromView.convertRect(fromView.bounds, toView: nil);
-        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToReturnToForInitialFrame: fromViewFrame) {
+        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToReturnToForInitialSize: fromView.frame.size) {
             return fromView.convertRect(rect, fromView: nil);
         }
-        if let view = manager.delegate?.emergePresentationManager?(manager, viewToReturnToForInitialFrame: fromViewFrame) {
+        if let view = manager.delegate?.emergePresentationManager?(manager, viewToReturnToForInitialSize: fromView.frame.size) {
             return fromView.convertRect(view.bounds, fromView: view);
         }
-        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToEmergeFromForFinalFrame: fromViewFrame) {
+        if let rect = manager.delegate?.emergePresentationManager?(manager, frameToEmergeFromForFinalSize: fromView.frame.size) {
             return fromView.convertRect(rect, fromView: nil);
         }
-        if let view = manager.delegate?.emergePresentationManager?(manager, viewToEmergeFromForFinalFrame: fromViewFrame) {
+        if let view = manager.delegate?.emergePresentationManager?(manager, viewToEmergeFromForFinalSize: fromView.frame.size) {
             return fromView.convertRect(view.bounds, fromView: view);
         }
         #if DEBUG
@@ -347,37 +342,36 @@ class EmergeAnimationDismissalAnimator:NSObject, UIViewControllerAnimatedTransit
         #endif
         return CGRectForRectOfInnerSize(CGSizeMake(1, 1), centeredInOuterSize: containerViewSize);
     }
-
+    
     func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
-        let containerView = transitionContext.containerView();
-        
-        if let fromView = transitionContext.viewForKey(UITransitionContextFromViewKey),
-        presentationController = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)?.presentationController {
-
-            containerView.addSubview(fromView);
-            fromView.frame = presentationController.frameOfPresentedViewInContainerView();
-
-            let toRect = getReturnToRectForFromView(fromView, containerViewSize: containerView.frame.size);
-            
-            let animationDuration = transitionDuration(transitionContext);
-            let scale = CGAffineTransformMakeScale(toRect.width/fromView.bounds.width, toRect.height/fromView.bounds.height);
-            let translate = CGAffineTransformMakeTranslation(CGRectGetMidX(toRect) - CGRectGetMidX(fromView.bounds),
-                CGRectGetMidY(toRect) - CGRectGetMidY(fromView.bounds));
-
-            fromView.transform = CGAffineTransformIdentity;
-
-            UIView.animateWithDuration(animationDuration, delay: 0,
-                usingSpringWithDamping: manager.delegate?.springDampingForReturnAnimationForEmergePresentationManager?(manager) ??
-                    EmergePresentationManager.returnAnimationDefaultSpringDamping,
-                initialSpringVelocity: manager.delegate?.initialSpringVelocityForReturnAnimationForEmergePresentationManager?(manager) ??
-                    EmergePresentationManager.returnAnimationDefaultInitialSpringVelocity,
-                options: nil, animations: { () -> Void in
-                fromView.transform = CGAffineTransformConcat(scale, translate);
-                fromView.alpha = 0;
+        if let containerView = transitionContext.containerView(),
+            fromView = transitionContext.viewForKey(UITransitionContextFromViewKey),
+            presentationController = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)?.presentationController {
                 
-                }, completion: { (complete) -> Void in
-                    transitionContext.completeTransition(!transitionContext.transitionWasCancelled());
-            })
+                containerView.addSubview(fromView);
+                fromView.frame = presentationController.frameOfPresentedViewInContainerView();
+                
+                let toRect = getReturnToRectForFromView(fromView, containerViewSize: containerView.frame.size);
+                
+                let animationDuration = transitionDuration(transitionContext);
+                let scale = CGAffineTransformMakeScale(toRect.width/fromView.bounds.width, toRect.height/fromView.bounds.height);
+                let translate = CGAffineTransformMakeTranslation(CGRectGetMidX(toRect) - CGRectGetMidX(fromView.bounds),
+                    CGRectGetMidY(toRect) - CGRectGetMidY(fromView.bounds));
+                
+                fromView.transform = CGAffineTransformIdentity;
+                
+                UIView.animateWithDuration(animationDuration, delay: 0,
+                    usingSpringWithDamping: manager.delegate?.springDampingForReturnAnimationForEmergePresentationManager?(manager) ??
+                        EmergePresentationManager.returnAnimationDefaultSpringDamping,
+                    initialSpringVelocity: manager.delegate?.initialSpringVelocityForReturnAnimationForEmergePresentationManager?(manager) ??
+                        EmergePresentationManager.returnAnimationDefaultInitialSpringVelocity,
+                    options: [], animations: {
+                        fromView.transform = CGAffineTransformConcat(scale, translate);
+                        fromView.alpha = 0;
+                        
+                    }, completion: { complete in
+                        transitionContext.completeTransition(!transitionContext.transitionWasCancelled());
+                })
         }
     }
 }

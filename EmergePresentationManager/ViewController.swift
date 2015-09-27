@@ -11,21 +11,20 @@ import UIKit
 class ViewController: UIViewController, EmergePresentationManagerDelegate {
     @IBOutlet weak var presentButton: UIButton!
     
-    lazy var emergePresentationManager = EmergePresentationManager();
+    lazy var emergePresentationManager:EmergePresentationManager = EmergePresentationManager(delegate: self);
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if(segue.identifier == "presentationSegue") {
-            emergePresentationManager.delegate = self;
-            
-            let destVC = segue.destinationViewController as! UIViewController;
+            let destVC = segue.destinationViewController;
             destVC.transitioningDelegate = emergePresentationManager;
             destVC.modalPresentationStyle = .Custom;
         }
     }
     
-    func emergePresentationManager(manager: EmergePresentationManager, viewToEmergeFromForFinalFrame finalFrame: CGRect) -> UIView {
+    func emergePresentationManager(manager: EmergePresentationManager, viewToEmergeFromForFinalSize finalSize: CGSize) -> UIView {
         return presentButton;
     }
-    
+
     @IBAction func unwind(segue: UIStoryboardSegue) {}
 }
 
