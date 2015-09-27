@@ -43,7 +43,7 @@ vc.transitioningDelegate = emergePresentationManager;
 Finally, inform the EmergePresentationManager instance where to begin the animation by implementing, at minimum, either the `emergePresentationManager:frameToEmergeFromForFinalSize:` or `emergePresentationManager:viewToEmergeFromForFinalSize:` delegate methods. The frame-returning functions are preferred over the view-returning functions if both are implemented.
 
 ```swift
-func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFromForFinalFrame finalFrame:CGRect) -> UIView {
+func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFromForFinalSize finalSize:CGSize) -> UIView {
    return theViewToEmergeFrom;
 }
 ```
@@ -51,7 +51,7 @@ func emergePresentationManager(manager:EmergePresentationManager, viewToEmergeFr
 If you choose to implement `emergePresentationManager:frameToEmergeFromForFinalSize:` instead, make sure to return a frame in the window base coordinate system. You can do this by using UIView's `convertRect:toView:` method and passing in nil for the `toView` parameter.
 
 ```swift
-func emergePresentationManager(manager:EmergePresentationManager, frameToEmergeFromForFinalFrame finalFrame:CGRect) -> CGRect {
+func emergePresentationManager(manager:EmergePresentationManager, frameToEmergeFromForFinalSize finalSize:CGSize) -> CGRect {
    return theViewToEmergeFrom.convertRect(theViewToEmergeFrom.bounds, toView: nil);
 }
 ```
