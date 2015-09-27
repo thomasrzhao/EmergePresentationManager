@@ -1,5 +1,7 @@
 # EmergePresentationManager
 
+**Due to a bug in the compiler, the Swift 2.0 version is in a separate branch (swift2) and has a slightly different API. The following information applies to Swift 1.2 only.**
+ 
 This is a class that animates modal views emerging from an arbitrary location onscreen. For example, if tapping a button results in a modal view being presented, you can use this class to have the view appear from the button instead of from the bottom of the screen.
 
 ## Demo
